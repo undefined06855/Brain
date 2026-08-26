@@ -1,1 +1,1 @@
-export type StringMap = { [k: string]: string | null }
+export type StringMap = { [k: string]: string | null };

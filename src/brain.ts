@@ -142,9 +142,13 @@ export class Brain {
                 },
             })
             .on("head", {
-                element: async (head) => {
+                element: async head => {
                     let dependencies = component.getDependencies().unwrapOr([]);
-                    let sources = dependencies.map(dep => this.generateClientJSForComponent(dep).unwrapOrElse(err => `// Failed to generate ${dep}: ${err}`));
+                    let sources = dependencies.map(dep =>
+                        this.generateClientJSForComponent(dep).unwrapOrElse(
+                            err => `// Failed to generate ${dep}: ${err}`,
+                        ),
+                    );
                     head.prepend(
                         `
                             <script blocking="render">
@@ -152,7 +156,7 @@ export class Brain {
                                 ${sources.join("")}
                             </script>
                         `.trim(),
-                        { html: true }
+                        { html: true },
                     );
                 },
             });

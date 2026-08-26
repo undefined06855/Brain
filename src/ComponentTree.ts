@@ -34,7 +34,9 @@ export default class ComponentTree {
         window.document.body.innerHTML = this.htmlString;
 
         if (window.document.body.children.length != 1) {
-            return Result.err(`component must be made of exactly one HTML element, found ${window.document.body.children.length}`);
+            return Result.err(
+                `component must be made of exactly one HTML element, found ${window.document.body.children.length}`,
+            );
         }
 
         let child = window.document.body.children[0]!;
@@ -53,13 +55,15 @@ export default class ComponentTree {
     generateClientJS(): Result<string> {
         if (!this.initialized) return Result.err("component tree has not been initialized yet");
 
-        return Result.ok(`
+        return Result.ok(
+            `
             !(() => {
                 window[${JSON.stringify(this.name)}] = (async (params = {}) => {
                     return ${this.head!.generateClientJS()}
                 });
             })();
-        `.trim());
+        `.trim(),
+        );
     }
 
     generateServerHTML(context: GenerationContext): Result<string> {

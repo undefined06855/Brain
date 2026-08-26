@@ -54,10 +54,12 @@ export class ComponentTreeElement extends TreeElement {
     }
 
     override generateServerHTML(context: GenerationContext): string {
-        return context.brain.generateServerHTMLForComponent(this.componentName, {
-            ...context.params,
-            ...this.params,
-        }).unwrap(); // we can unsafely unwrap because the only error is if the brain isnt initialised, which can't be true here
+        return context.brain
+            .generateServerHTMLForComponent(this.componentName, {
+                ...context.params,
+                ...this.params,
+            })
+            .unwrap(); // we can unsafely unwrap because the only error is if the brain isnt initialised, which can't be true here
     }
 
     getComponentName() {

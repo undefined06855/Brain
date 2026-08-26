@@ -38,9 +38,13 @@ export class JSTreeElement extends TreeElement {
     }
 
     override generateServerHTML(context: GenerationContext): string {
-        return eval(`(() => {
-            const SIDE = "server";
-            ${this.functionSource}
-        })()`) ?? "";
+        return (
+            eval(
+                `(() => {
+                    const SIDE = "server";
+                    ${this.functionSource}
+                })()`,
+            ) ?? ""
+        );
     }
 }
