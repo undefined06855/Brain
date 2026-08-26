@@ -67,6 +67,10 @@ export class Brain {
             let stem = split.join(".");
 
             this.components[stem] = new ComponentTree(stem, await file.text());
+            let res = this.components[stem].init();
+            if (res.isErr()) {
+                console.error(`Failed to load component ${stem}, ${res.unwrapErr()}`);
+            }
         }
 
         // read routes (which are also technically components but with extra checks and parsing)
@@ -79,6 +83,10 @@ export class Brain {
             let route = `${path}/${name}`;
 
             this.routes[route] = new ComponentTree("", await file.text());
+            let res = this.routes[route].init();
+            if (res.isErr()) {
+                console.error(`Failed to load component ${route}, ${res.unwrapErr()}`);
+            }
         }
 
         // read special thingymabobs
