@@ -10,6 +10,9 @@
         "typescript": "^5"
     },
     "dependencies": {
+        "@node-minify/core": "^10.5.0",
+        "@node-minify/html-minifier": "^10.5.0",
+        "@node-minify/terser": "^10.5.0",
         "happy-dom": "^20.11.6",
         "result-js": "https://github.com/undefined06855/result-js"
     },
