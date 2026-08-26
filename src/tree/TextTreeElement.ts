@@ -7,7 +7,7 @@ export class TextTreeElement extends TreeElement {
 
     constructor(root: Node) {
         super(root);
-        this.contents = root.textContent.trim();
+        this.contents = root.textContent;
     }
 
     static override matches(element: Node): boolean {
