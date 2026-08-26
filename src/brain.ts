@@ -1,7 +1,7 @@
 import { Result } from "result-js";
 import * as fs from "fs/promises";
 import ComponentTree from "./ComponentTree";
-import type { StringMap } from "./utils";
+import { errorMessageMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
 
 type SpecialRawTypes = "skeleton";
@@ -42,15 +42,15 @@ type SpecialComponentTypes = "error";
  * Note that internally, routes are also components.
  */
 export class Brain {
-    private static specialRawPages = ["skeleton"];
-    private static specialComponentPages = ["error"];
+    private static readonly specialRawPages = ["skeleton"] as const;
+    private static readonly specialComponentPages = ["error"] as const;
 
     private siteDataPath: string;
 
     private components: Record<string, ComponentTree>;
     private routes: Record<string, ComponentTree>;
-    private specialRaws: Record<string, string>;
-    private specialComponents: Record<string, ComponentTree>;
+    private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
+    private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
 
     constructor(siteDataPath: string) {
         this.siteDataPath = siteDataPath;
@@ -133,6 +133,22 @@ export class Brain {
     }
 
     /**
+     * Gets a component by name.
+     * @param name The name of the component
+     */
+    getComponent(name: string): Result<ComponentTree> {
+        return Result.fromNull(this.components[name], `component ${name} was not found`);
+    }
+
+    /**
+     * Gets a route by the path.
+     * @param path The name of the route
+     */
+    getRoute(path: string): Result<ComponentTree> {
+        return Result.fromNull(this.routes[path], `route ${path} was not found`);
+    }
+
+    /**
      * Generates a JS definition for a function that generates the component.
      * @param name The name of the component.
      * @returns The JS source as a function to generate that component if found, else an error.
@@ -147,7 +163,7 @@ export class Brain {
     }
 
     /**
-     * Generates the HTML source for a component.
+     * Generates the HTML source for a component, with nothing else attached.
      * @param name The name of the component.
      * @param params The parameters to pass to generation.
      * @returns The HTML source of the component if found, else an error.
@@ -162,28 +178,33 @@ export class Brain {
     }
 
     /**
-     * Generates the full HTML source for a route.
-     * @param route The route.
+     * Generates the full HTML source for a route, which can be returned in a HTTP response. If the route is not found,
+     * returns `Brain#generateErrorRoute` with the 404 error and the parameters fallen through.
+     * @param route The route, without the trailing slash!
      * @param parameters The parameters to pass into components which need them.
      * @returns The HTML source for the route as a Bun Response, if found, else an error.
      */
-    generateRoute(route: string, parameters: StringMap = {}): Response {
-        let res = this.generateRouteInternal(route, parameters);
-        if (res.unwrapErr()) {
-        }
-    }
-
-    private generateRouteInternal(route: string, parameters: StringMap = {}): Result<Response> {
+    generatePage(route: string, parameters: StringMap = {}): Response {
         let component = this.routes[route];
         if (!component) {
-            let parameters: StringMap = {};
-            parameters["Brain.errorCode"] = "404";
-            parameters["Brain.errorMessage"] = "Not Found";
-            let response = new Response(this.generatePageFromComponent(this.specialRaws["error"], parameters));
+            return this.generateErrorRoute(404, parameters);
         }
+
+        return new Response(this.generatePageFromComponent(component, parameters), {
+            headers: {
+                "Content-Type": "text/html",
+            },
+        });
     }
 
-    private generatePageFromComponent(component: ComponentTree, parameters: StringMap): string {
+    /**
+     * An internal function that may be called to skip generating a Response to get the raw HTML page string for a
+     * component.
+     * @param component The component to make the page with, should likely be a route component.
+     * @param parameters The parameters to pass into components which need them.
+     * @returns The raw HTML source for the route.
+     */
+    generatePageFromComponent(component: ComponentTree, parameters: StringMap): string {
         let html = component.generateServerHTML(new GenerationContext(this, parameters)).unwrapOrElse(err => err);
         let rewriter = new HTMLRewriter()
             .on("body", {
@@ -212,5 +233,28 @@ export class Brain {
             });
 
         return rewriter.transform(this.specialRaws["skeleton"]);
+    }
+
+    /**
+     * Generates the full HTML source for an error, using the special `error.html` page.
+     * @param errorCode The error code as a number
+     * @param parameters The parameters to pass to the page. Note that `Brain.errorCode` and `Brain.errorMessage` get
+     *                   passed for you.
+     * @returns The Response containing the error page.
+     */
+    generateErrorRoute(errorCode: number, parameters: StringMap = {}): Response {
+        let errorMessage = errorMessageMap[errorCode]!;
+        parameters["Brain.errorCode"] = errorCode.toString();
+        parameters["Brain.errorMessage"] = errorMessage;
+
+        let page = this.generatePageFromComponent(this.specialComponents["error"], parameters);
+        return new Response(page, {
+            headers: {
+                "Content-Type": "text/html",
+            },
+
+            status: errorCode,
+            statusText: errorMessage,
+        });
     }
 }
