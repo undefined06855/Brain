@@ -1,7 +1,14 @@
 import { HTMLElement, Window } from "happy-dom";
 import { Result } from "result-js";
 import type { GenerationContext } from "./GenerationContext";
-import { TextTreeElement, ParamTreeElement, JSTreeElement, ComponentTreeElement, ElementTreeElement, DependencyTreeElement } from "./tree";
+import {
+    TextTreeElement,
+    ParamTreeElement,
+    JSTreeElement,
+    ComponentTreeElement,
+    ElementTreeElement,
+    DependencyTreeElement,
+} from "./tree";
 import TreeElement from "./tree/TreeElement";
 
 // in order of priority
@@ -59,7 +66,7 @@ export default class ComponentTree {
         return Result.ok(
             `
             !(() => {
-                window[${JSON.stringify(this.name)}] = (async (params = {}) => {
+                window[${JSON.stringify(this.name)}] = ((params = {}) => {
                     return ${this.head!.generateClientJS()}
                 });
             })();

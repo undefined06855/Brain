@@ -137,12 +137,12 @@ export class Brain {
         let html = component.generateServerHTML(new GenerationContext(this, parameters)).unwrapOrElse(err => err);
         let rewriter = new HTMLRewriter()
             .on("body", {
-                async element(body) {
+                element(body) {
                     body.append(html, { html: true });
                 },
             })
             .on("head", {
-                element: async head => {
+                element: head => {
                     let dependencies = component.getDependencies().unwrapOr([]);
                     let sources = dependencies.map(dep =>
                         this.generateClientJSForComponent(dep).unwrapOrElse(

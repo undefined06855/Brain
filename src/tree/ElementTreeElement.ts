@@ -55,12 +55,12 @@ export class ElementTreeElement extends TreeElement {
         }
 
         return `
-            (await (async () => {
+            (() => {
                 let ret = document.createElement(${JSON.stringify(this.nodeName)});
                 ${attributeString}
                 ${childrenString}
                 return ret;
-            })())
+            })()
         `.trim();
     }
 
