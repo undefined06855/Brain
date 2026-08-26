@@ -7,7 +7,7 @@ import { GenerationContext } from "./GenerationContext";
 type SpecialTypes = "skeleton";
 
 /**
- * The main Brain class. You should instanciate an instance of this class, passing in the path to the datas needed, then
+ * The main Brain class. You should instantiate an instance of this class, passing in the path to the datas needed, then
  * call and await Brain#init, which will read the paths and files inside them. Then, in your server handler, call
  * Brain#generateRoute.
  *
@@ -85,6 +85,11 @@ export class Brain {
         this.specials["skeleton"] = await Bun.file(`${this.siteDataPath}/special/skeleton.html`).text();
     }
 
+    /**
+     * Generates a JS definition for a function that generates the component.
+     * @param name The name of the component.
+     * @returns The JS source as a function to generate that component if found, else an error.
+     */
     generateClientJSForComponent(name: string): Result<string> {
         let component = this.components[name];
         if (!component) {
@@ -94,6 +99,12 @@ export class Brain {
         return component.generateClientJS();
     }
 
+    /**
+     * Generates the HTML source for a component.
+     * @param name The name of the component.
+     * @param params The parameters to pass to generation.
+     * @returns The HTML source of the component if found, else an error.
+     */
     generateServerHTMLForComponent(name: string, params: StringMap): Result<string> {
         let component = this.components[name];
         if (!component) {
@@ -103,6 +114,12 @@ export class Brain {
         return component.generateServerHTML(new GenerationContext(this, params));
     }
 
+    /**
+     * Generates the full HTML source for a route.
+     * @param route The route.
+     * @param parameters The parameters to pass into components which need them.
+     * @returns The HTML source for the route as a Bun Response, if found, else an error.
+     */
     generateRoute(route: string, parameters: StringMap = {}): Result<Response> {
         let component = this.routes[route];
         if (!component) {
