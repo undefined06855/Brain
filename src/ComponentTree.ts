@@ -10,9 +10,6 @@ import {
     DependencyTreeElement,
 } from "./tree";
 import TreeElement from "./tree/TreeElement";
-import { minify } from "@node-minify/core";
-import { terser } from "@node-minify/terser";
-import { htmlMinifier } from "@node-minify/html-minifier";
 
 // in order of priority
 // since something like JSTreeElement will match for comments which should be ParamTreeElements, it is placed later
@@ -30,9 +27,6 @@ export default class ComponentTree {
     private root: HTMLElement | null = null;
     private head: ElementTreeElement | null = null;
     private initialized: boolean = false;
-
-    private cachedJS: string | null = null;
-    private cachedHTML: string | null = null;
 
     /**
      * @param {string} name
@@ -66,56 +60,24 @@ export default class ComponentTree {
         return Result.ok();
     }
 
-    async generateClientJS(): Promise<Result<string>> {
+    generateClientJS(): Result<string> {
         if (!this.initialized) return Result.err("component tree has not been initialized yet");
-        if (this.cachedJS) return Result.ok(this.cachedJS);
 
-        let jsString = `
+        return Result.ok(
+            `
             !(() => {
                 window[${JSON.stringify(this.name)}] = ((params = {}) => {
                     return ${this.head!.generateClientJS()}
                 });
             })();
-        `.trim();
-
-        let res = await Result.fromPromise(
-            minify({
-                compressor: terser,
-                content: jsString,
-            }),
+        `.trim(),
         );
-
-        if (res.isErr()) return Result.err(res.unwrapErr() as string);
-
-        let minified = res.unwrap();
-        if (this.isCacheable().unwrap()) {
-            this.cachedJS = minified;
-        }
-
-        return Result.ok(minified);
     }
 
-    async generateServerHTML(context: GenerationContext): Promise<Result<string>> {
+    generateServerHTML(context: GenerationContext): Result<string> {
         if (!this.initialized) return Result.err("component tree has not been initialized yet");
-        if (this.cachedHTML) return Result.ok(this.cachedHTML);
 
-        let htmlString = this.head!.generateServerHTML(context);
-
-        let res = await Result.fromPromise(
-            minify({
-                compressor: htmlMinifier,
-                content: htmlString,
-            }),
-        );
-
-        if (res.isErr()) return Result.err(res.unwrapErr() as string);
-
-        let minified = res.unwrap();
-        if (this.isCacheable().unwrap()) {
-            this.cachedJS = minified;
-        }
-
-        return Result.ok(minified);
+        return Result.ok(this.head!.generateServerHTML(context));
     }
 
     getDependencies(): Result<Array<string>> {
