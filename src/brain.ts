@@ -58,7 +58,10 @@ export class Brain {
      */
     async init() {
         // read components
-        for (let info of await fs.readdir(`${this.siteDataPath}/components`, { withFileTypes: true })) {
+        for (let info of await fs.readdir(`${this.siteDataPath}/components`, {
+            withFileTypes: true,
+            recursive: true,
+        })) {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
@@ -74,7 +77,7 @@ export class Brain {
         }
 
         // read routes (which are also technically components but with extra checks and parsing)
-        for (let info of await fs.readdir(`${this.siteDataPath}/routes`, { withFileTypes: true })) {
+        for (let info of await fs.readdir(`${this.siteDataPath}/routes`, { withFileTypes: true, recursive: true })) {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
@@ -91,6 +94,12 @@ export class Brain {
 
         // read special thingymabobs
         this.specials["skeleton"] = await Bun.file(`${this.siteDataPath}/special/skeleton.html`).text();
+
+        console.info(
+            `Loaded ${Object.keys(this.components).length} components and ${Object.keys(this.routes).length} routes.`,
+        );
+        console.debug(`Loaded components: ${Object.keys(this.components).join(", ")}`);
+        console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
     }
 
     /**
