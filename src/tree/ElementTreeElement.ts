@@ -4,6 +4,7 @@ import type { StringMap } from "../utils";
 import type { GenerationContext } from "../GenerationContext";
 import { ParamTreeElement } from "./ParamTreeElement";
 import { ComponentTreeElement } from "./ComponentTreeElement";
+import { DependencyTreeElement } from "./DependencyTreeElement";
 
 /**
  * A tree element which repesents just any normal HTML element.
@@ -95,7 +96,7 @@ export class ElementTreeElement extends TreeElement {
 
         for (let child of this.childNodes) {
             if (child instanceof ElementTreeElement) ret.push(...child.getDependencies());
-            if (child instanceof ComponentTreeElement) ret.push(child.getComponentName());
+            if (child instanceof DependencyTreeElement) ret.push(child.getComponentName());
         }
 
         return ret;

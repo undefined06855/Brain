@@ -1,13 +1,14 @@
 import { HTMLElement, Window } from "happy-dom";
 import { Result } from "result-js";
 import type { GenerationContext } from "./GenerationContext";
-import { TextTreeElement, ParamTreeElement, JSTreeElement, ComponentTreeElement, ElementTreeElement } from "./tree";
+import { TextTreeElement, ParamTreeElement, JSTreeElement, ComponentTreeElement, ElementTreeElement, DependencyTreeElement } from "./tree";
 import TreeElement from "./tree/TreeElement";
 
 // in order of priority
 // since something like JSTreeElement will match for comments which should be ParamTreeElements, it is placed later
 // this is iterated in the ElementTreeElement constructor
 TreeElement.treeElementTypes.push(TextTreeElement);
+TreeElement.treeElementTypes.push(DependencyTreeElement);
 TreeElement.treeElementTypes.push(ComponentTreeElement);
 TreeElement.treeElementTypes.push(ParamTreeElement);
 TreeElement.treeElementTypes.push(JSTreeElement);
