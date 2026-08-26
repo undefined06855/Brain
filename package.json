@@ -1,0 +1,16 @@
+{
+  "name": "brain",
+  "module": "index.ts",
+  "type": "module",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "happy-dom": "^20.11.6",
+    "result-js": "https://github.com/undefined06855/result-js"
+  }
+}
