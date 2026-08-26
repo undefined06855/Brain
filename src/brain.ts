@@ -69,11 +69,13 @@ export class Brain {
             split.pop();
             let stem = split.join(".");
 
-            this.components[stem] = new ComponentTree(stem, await file.text());
-            let res = this.components[stem].init();
+            let componentTree = new ComponentTree(stem, await file.text());
+            let res = componentTree.init();
             if (res.isErr()) {
                 console.error(`Failed to load component ${stem}, ${res.unwrapErr()}`);
             }
+
+            this.components[stem] = componentTree;
         }
 
         // read routes (which are also technically components but with extra checks and parsing)
@@ -84,12 +86,16 @@ export class Brain {
             let path = info.parentPath.replace(`${this.siteDataPath}/routes`, "");
             let name = info.name == "index.html" ? "" : info.name;
             let route = `${path}/${name}`;
+            if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
 
-            this.routes[route] = new ComponentTree("", await file.text());
-            let res = this.routes[route].init();
+            let componentTree = new ComponentTree("", await file.text());
+            let res = componentTree.init();
             if (res.isErr()) {
                 console.error(`Failed to load component ${route}, ${res.unwrapErr()}`);
             }
+
+            // still add it to routes even if it fails so it can show the "node tree is not initialised" error
+            this.routes[route] = componentTree;
         }
 
         // read special thingymabobs
