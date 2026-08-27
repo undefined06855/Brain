@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import ComponentTree from "./ComponentTree";
 import { errorMessageMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
+import type { BunFile } from "bun";
 
 type SpecialRawTypes = "skeleton";
 type SpecialComponentTypes = "error";
@@ -81,13 +82,7 @@ export class Brain {
             split.pop();
             let stem = split.join(".");
 
-            let componentTree = new ComponentTree(stem, await file.text());
-            let res = componentTree.init();
-            if (res.isErr()) {
-                console.error(`Failed to load component ${stem}, ${res.unwrapErr()}`);
-            }
-
-            this.components[stem] = componentTree;
+            await this.registerComponent(stem, file);
         }
 
         // read routes (which are also technically components but with extra checks and parsing)
@@ -100,14 +95,7 @@ export class Brain {
             let route = `${path}/${name}`;
             if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
 
-            let componentTree = new ComponentTree("", await file.text());
-            let res = componentTree.init();
-            if (res.isErr()) {
-                console.error(`Failed to load component ${route}, ${res.unwrapErr()}`);
-            }
-
-            // still add it to routes even if it fails so it can show the "node tree is not initialised" error
-            this.routes[route] = componentTree;
+            await this.registerRoute(route, file);
         }
 
         // read special thingymabobs
@@ -117,11 +105,13 @@ export class Brain {
 
         for (let page of Brain.specialComponentPages) {
             this.specialComponents[page] = new ComponentTree(
-                "",
+                `special:${page}`,
                 await Bun.file(`${this.siteDataPath}/special/${page}.html`).text(),
             );
-            if (this.specialComponents[page].init().isErr()) {
-                console.error("Failed to load error page: ");
+
+            let res = this.specialComponents[page].init();
+            if (res.isErr()) {
+                console.error(`Failed to load error page: ${res.unwrapErr()}`);
             }
         }
 
@@ -130,6 +120,39 @@ export class Brain {
         );
         console.debug(`Loaded components: ${Object.keys(this.components).join(", ")}`);
         console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
+    }
+
+    /**
+     * Registers a component. Can be called manually, if you really want.
+     * @param name The name of the component.
+     * @param file The file containing the HTML data for this component.
+     */
+    async registerComponent(name: string, file: BunFile): Promise<Result<ComponentTree>> {
+        let componentTree = new ComponentTree(name, await file.text());
+        let res = componentTree.init();
+        if (res.isErr()) {
+            console.error(`Failed to load component ${name}, ${res.unwrapErr()}`);
+        }
+
+        this.components[name] = componentTree;
+        return res.isErr() ? Result.err(res.unwrapErr()) : Result.ok(componentTree);
+    }
+
+    /**
+     * Registers a route. Can be called manually, if you really want.
+     * @param route The route that this file refers to, with the preceding slash.
+     * @param file The file containing th HTML data for this route.
+     */
+    async registerRoute(route: string, file: BunFile): Promise<Result<ComponentTree>> {
+        let componentTree = new ComponentTree(route, await file.text());
+        let res = componentTree.init();
+        if (res.isErr()) {
+            console.error(`Failed to load component ${route}, ${res.unwrapErr()}`);
+        }
+
+        // still add it to routes even if it fails so it can show the "node tree is not initialised" error
+        this.routes[route] = componentTree;
+        return res.isErr() ? Result.err(res.unwrapErr()) : Result.ok(componentTree);
     }
 
     /**
