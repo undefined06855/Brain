@@ -131,10 +131,11 @@ export class Brain {
         }
 
         console.info(
-            `Loaded ${Object.keys(this.components).length} components and ${Object.keys(this.routes).length} routes.`,
+            `Loaded ${Object.keys(this.components).length} components, ${Object.keys(this.routes).length} routes, and ${Object.keys(this.staticFiles).length} static files.`,
         );
         console.debug(`Loaded components: ${Object.keys(this.components).join(", ")}`);
         console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
+        console.debug(`Loaded static files:\n  - ${Object.keys(this.staticFiles).join("\n  - ")}`);
     }
 
     /**
