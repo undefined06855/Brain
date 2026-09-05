@@ -57,6 +57,11 @@ export class Brain {
     constructor(siteDataPath: string) {
         this.siteDataPath = siteDataPath;
 
+        // cut off ./ since fs.readdir doesn't prepend it
+        if (this.siteDataPath.startsWith("./")) {
+            this.siteDataPath = this.siteDataPath.slice(2, 0);
+        }
+
         this.components = {};
         this.routes = {};
         this.staticFiles = {};
