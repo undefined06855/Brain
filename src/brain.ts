@@ -110,7 +110,7 @@ export class Brain {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
-            let path = info.parentPath.replace(`${this.siteDataPath}/routes`, "");
+            let path = info.parentPath.replace(`${this.siteDataPath}/static`, "");
             let name = info.name == "index.html" ? "" : info.name;
             let route = `${path}/${name}`;
             if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
