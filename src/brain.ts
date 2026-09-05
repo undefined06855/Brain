@@ -141,7 +141,7 @@ export class Brain {
     /**
      * Registers a route. Can be called manually, if you really want.
      * @param route The route that this file refers to, with the preceding slash.
-     * @param file The file containing th HTML data for this route.
+     * @param file The file containing the HTML data for this route.
      */
     async registerRoute(route: string, file: BunFile): Promise<Result<ComponentTree>> {
         let componentTree = new ComponentTree(route, await file.text());
