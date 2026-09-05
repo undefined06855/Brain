@@ -50,6 +50,7 @@ export class Brain {
 
     private components: Record<string, ComponentTree>;
     private routes: Record<string, ComponentTree>;
+    private staticFiles: Record<string, BunFile>;
     private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
     private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
 
@@ -58,6 +59,7 @@ export class Brain {
 
         this.components = {};
         this.routes = {};
+        this.staticFiles = {};
 
         // @ts-ignore since we don't define each one explicitly
         this.specialRaws = {};
@@ -98,6 +100,19 @@ export class Brain {
             await this.registerRoute(route, file);
         }
 
+        // read static files (which are just stored as BunFiles)
+        for (let info of await fs.readdir(`${this.siteDataPath}/static`, { withFileTypes: true, recursive: true })) {
+            if (info.isDirectory()) continue;
+            let file = Bun.file(`${info.parentPath}/${info.name}`);
+
+            let path = info.parentPath.replace(`${this.siteDataPath}/routes`, "");
+            let name = info.name == "index.html" ? "" : info.name;
+            let route = `${path}/${name}`;
+            if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
+
+            await this.registerStaticFile(route, file);
+        }
+
         // read special thingymabobs
         for (let page of Brain.specialRawPages) {
             this.specialRaws[page] = await Bun.file(`${this.siteDataPath}/special/${page}.html`).text();
@@ -135,7 +150,7 @@ export class Brain {
         }
 
         this.components[name] = componentTree;
-        return res.isErr() ? Result.err(res.unwrapErr()) : Result.ok(componentTree);
+        return res.map(() => componentTree);
     }
 
     /**
@@ -152,7 +167,23 @@ export class Brain {
 
         // still add it to routes even if it fails so it can show the "node tree is not initialised" error
         this.routes[route] = componentTree;
-        return res.isErr() ? Result.err(res.unwrapErr()) : Result.ok(componentTree);
+        return res.map(() => componentTree);
+    }
+
+    /**
+     * Registers a static file. Can be called manually, and should be called manually for if static files update with
+     * new data.
+     * @param path The path that this file refers to, with the preceding slash.
+     * @param file The file for this path.
+     */
+    async registerStaticFile(path: string, file: BunFile): Promise<Result> {
+        if (!await file.exists()) {
+            return Result.err("file does not exist");
+        }
+
+        // this will replace the file if it already exists
+        this.staticFiles[path] = file;
+        return Result.ok();
     }
 
     /**
@@ -165,10 +196,18 @@ export class Brain {
 
     /**
      * Gets a route by the path.
-     * @param path The name of the route
+     * @param path The path of the route
      */
     getRoute(path: string): Result<ComponentTree> {
         return Result.fromNull(this.routes[path], `route ${path} was not found`);
+    }
+
+    /**
+     * Gets a static file by the path.
+     * @param path The path of the file
+     */
+    getStaticFile(path: string): Result<BunFile> {
+        return Result.fromNull(this.staticFiles[path], `static file ${path} was not found`);
     }
 
     /**
@@ -208,9 +247,24 @@ export class Brain {
      * @returns The HTML source for the route as a Bun Response, if found, else an error.
      */
     generatePage(route: string, parameters: StringMap = {}): Response {
+        parameters = {
+            ...parameters,
+            "Brain.route": route
+        }
+
         let component = this.routes[route];
         if (!component) {
-            return this.generateErrorRoute(404, parameters);
+            let file = this.staticFiles[route];
+
+            if (!file) {
+                return this.generateErrorRoute(404, parameters);
+            }
+
+            return new Response(file, {
+                headers: {
+                    "Content-Type": file.type
+                }
+            })
         }
 
         return new Response(this.generatePageFromComponent(component, parameters), {
