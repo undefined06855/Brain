@@ -59,7 +59,7 @@ export class Brain {
 
         // cut off ./ since fs.readdir doesn't prepend it
         if (this.siteDataPath.startsWith("./")) {
-            this.siteDataPath = this.siteDataPath.slice(2, 0);
+            this.siteDataPath = this.siteDataPath.slice(2);
         }
 
         this.components = {};
