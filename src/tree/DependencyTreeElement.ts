@@ -29,7 +29,7 @@ export class DependencyTreeElement extends TreeElement {
     }
 
     override generateServerHTML(context: GenerationContext): string {
-        return "";
+        return context.debug ? `<!-- hidden: dependency on ${this.componentName} -->` : "";
     }
 
     getComponentName() {

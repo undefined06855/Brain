@@ -29,7 +29,24 @@ export class ParamTreeElement extends TreeElement {
     }
 
     override generateServerHTML(context: GenerationContext): string {
-        return context.params[this.paramName] ?? `(param "${this.paramName}" which was not provided)`;
+        if (!context.params[this.paramName]) {
+            return `
+                <!--
+                    debug note: parameter ${this.paramName} was not found out of ${Object.entries(context.params).length} parameters:
+                    ${Object.entries(context.params)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join("\n")}
+                -->
+
+                (param "${this.paramName}" which was not provided)
+            `.trim();
+        }
+
+        if (context.debug) {
+            return `<!-- parameter ${this.paramName}--> ${context.params[this.paramName]} <!-- end param -->`;
+        } else {
+            return context.params[this.paramName];
+        }
     }
 
     getParamName() {

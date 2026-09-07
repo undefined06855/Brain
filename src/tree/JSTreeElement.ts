@@ -45,6 +45,16 @@ export class JSTreeElement extends TreeElement {
             })() ?? ""
         `.trim();
 
-        return eval(evalString);
+        if (context.debug) {
+            return `
+                <!-- begin javascript evaluation of:
+                    ${evalString}
+                -->
+                    ${eval(evalString)}
+                <!-- end javascript evaluation -->
+            `.trim();
+        } else {
+            return eval(evalString);
+        }
     }
 }
