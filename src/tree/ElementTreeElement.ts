@@ -3,7 +3,6 @@ import TreeElement from "./TreeElement";
 import type { StringMap } from "../utils";
 import type { GenerationContext } from "../GenerationContext";
 import { ParamTreeElement } from "./ParamTreeElement";
-import { ComponentTreeElement } from "./ComponentTreeElement";
 import { DependencyTreeElement } from "./DependencyTreeElement";
 
 /**

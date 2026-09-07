@@ -1,7 +1,7 @@
 import { Result } from "result-js";
 import * as fs from "fs/promises";
 import ComponentTree from "./ComponentTree";
-import { errorMessageMap, type StringMap } from "./utils";
+import { errorMessageMap, type ParameterMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
 import type { BunFile } from "bun";
 
@@ -293,7 +293,7 @@ export class Brain {
      * @param params The parameters to pass to generation.
      * @returns The HTML source of the component if found, else an error.
      */
-    generateServerHTMLForComponent(name: string, params: StringMap): Result<string> {
+    generateServerHTMLForComponent(name: string, params: ParameterMap): Result<string> {
         let component = this.components[name];
         if (!component) {
             return Result.err(`component ${name} was not found`);
@@ -309,7 +309,7 @@ export class Brain {
      * @param parameters The parameters to pass into components which need them.
      * @returns The HTML source for the route as a Bun Response, if found, else an error.
      */
-    generatePage(route: string, parameters: StringMap = {}): Response {
+    generatePage(route: string, parameters: ParameterMap = {}): Response {
         parameters = {
             ...parameters,
             "Brain.route": route,
@@ -344,7 +344,7 @@ export class Brain {
      * @param parameters The parameters to pass into components which need them.
      * @returns The raw HTML source for the route.
      */
-    generatePageFromComponent(component: ComponentTree, parameters: StringMap): string {
+    generatePageFromComponent(component: ComponentTree, parameters: ParameterMap): string {
         let html = component.generateServerHTML(new GenerationContext(this, parameters)).merge();
         let rewriter = new HTMLRewriter()
             .on("body", {
@@ -399,7 +399,7 @@ export class Brain {
      *                   passed for you.
      * @returns The Response containing the error page.
      */
-    generateErrorRoute(errorCode: number, parameters: StringMap = {}): Response {
+    generateErrorRoute(errorCode: number, parameters: ParameterMap = {}): Response {
         let errorMessage = errorMessageMap[errorCode]!;
         parameters["Brain.errorCode"] = errorCode.toString();
         parameters["Brain.errorMessage"] = errorMessage;
