@@ -38,9 +38,15 @@ export class BrainConfig {
     }
 
     /**
-     * Sets the path for where Brain gets components from. This is required for the server to start.
+     * Sets the path for where Brain gets components from. This is required for the server to start. On Windows,
+     * backslashes in the file path are replaced with forward slashes.
      */
     setSiteDataPath(siteDataPath: string) {
+        // forward slashes only!
+        if (process.platform == "win32") {
+            siteDataPath = siteDataPath.replaceAll("\\", "/");
+        }
+
         this.siteDataPath = siteDataPath;
         return this;
     }
@@ -258,7 +264,7 @@ export class Brain {
      * Takes in the name of the element and a callback, in the same type that Bun's HTMLRewriter allows.
      * See https://bun.com/docs/runtime/html-rewriter.
      * TODO: Maybe allow removing hooks?
-     * 
+     *
      * @param element The name of the HTML element to call the callback on.
      * @param callback The callback to run on it.
      */
