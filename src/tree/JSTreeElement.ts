@@ -38,13 +38,15 @@ export class JSTreeElement extends TreeElement {
     }
 
     override generateServerHTML(context: GenerationContext): string {
-        return (
-            eval(
-                `(() => {
-                    const SIDE = "server";
-                    ${this.functionSource}
-                })()`,
-            ) ?? ""
-        );
+        let evalString = `
+            (() => {
+                const SIDE = "server";
+                ${this.functionSource}
+            })() ?? ""
+        `.trim();
+
+        console.debug(evalString);
+
+        return eval(evalString);
     }
 }
