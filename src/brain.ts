@@ -132,7 +132,7 @@ export class Brain {
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: no preceding slash here
-            let path = info.parentPath.replace(`${this.siteDataPath}/routes/`, "");
+            let path = info.parentPath.replace(`${this.siteDataPath}/components/`, "");
             let route = `${path}/${info.name}`;
             let split = route.split(".");
             split.pop();
@@ -187,7 +187,7 @@ export class Brain {
         console.info(
             `Loaded ${Object.keys(this.components).length} components, ${Object.keys(this.routes).length} routes, and ${Object.keys(this.staticFiles).length} static files.`,
         );
-        console.debug(`Loaded components: ${Object.keys(this.components).join(", ")}`);
+        console.debug(`Loaded components:\n  - ${Object.keys(this.components).join("\n  - ")}`);
         console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
         console.debug(`Loaded static files:\n  - ${Object.keys(this.staticFiles).join("\n  - ")}`);
     }
