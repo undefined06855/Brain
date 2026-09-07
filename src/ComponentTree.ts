@@ -63,21 +63,29 @@ export default class ComponentTree {
     generateClientJS(): Result<string> {
         if (!this.initialized) return Result.err("component tree has not been initialized yet");
 
-        return Result.ok(
-            `
-            !(() => {
-                window[${JSON.stringify(this.name)}] = ((params = {}) => {
-                    return ${this.head!.generateClientJS()}
-                });
-            })();
-        `.trim(),
+        return Result.ok(`
+                !(() => {
+                    window[${JSON.stringify(this.name)}] = ((params = {}) => {
+                        return ${this.head!.generateClientJS()}
+                    });
+                })();
+            `.trim(),
         );
     }
 
     generateServerHTML(context: GenerationContext): Result<string> {
         if (!this.initialized) return Result.err("component tree has not been initialized yet");
 
-        return Result.ok(this.head!.generateServerHTML(context));
+        if (context.debug) {
+            return Result.ok(`
+                <!-- begin ${this.name} -->
+                    ${this.head!.generateServerHTML(context)}
+                <!-- end ${this.name} -->
+            `.trim());
+        } else {
+            return Result.ok(this.head!.generateServerHTML(context));
+        }
+
     }
 
     getDependencies(): Result<Array<string>> {
