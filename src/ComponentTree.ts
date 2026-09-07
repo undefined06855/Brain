@@ -80,7 +80,7 @@ export default class ComponentTree {
         if (context.debug) {
             return Result.ok(
                 `
-                <!-- begin ${this.name} -->
+                <!-- begin ${this.name} (cacheable: ${this.isCacheable().unwrap()}, ${this.getDependencies().unwrap().length} dependencies, ${this.getParameters().unwrap().length} parameters) -->
                     ${this.head!.generateServerHTML(context)}
                 <!-- end ${this.name} -->
             `.trim(),
