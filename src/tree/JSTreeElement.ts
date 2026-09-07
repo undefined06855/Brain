@@ -7,7 +7,7 @@ import type { GenerationContext } from "../GenerationContext";
  * Matched by comments that look like <!--{{ return "hi" }}--> and match no other possible tree elements.
  */
 export class JSTreeElement extends TreeElement {
-    private static regex = /\s*{{\s*(.+)\s*}}\s*/;
+    private static regex = /\s*{{\s*((?:.|\n)+)\s*}}\s*/;
 
     private functionSource: string;
 
@@ -44,8 +44,6 @@ export class JSTreeElement extends TreeElement {
                 ${this.functionSource}
             })() ?? ""
         `.trim();
-
-        console.debug(evalString);
 
         return eval(evalString);
     }
