@@ -131,7 +131,10 @@ export class Brain {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
-            let split = info.name.split(".");
+            // note: no preceding slash here
+            let path = info.parentPath.replace(`${this.siteDataPath}/routes/`, "");
+            let route = `${path}/${info.name}`;
+            let split = route.split(".");
             split.pop();
             let stem = split.join(".");
 
@@ -143,6 +146,7 @@ export class Brain {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
+            // note: preceding slash here
             let path = info.parentPath.replace(`${this.siteDataPath}/routes`, "");
             let name = info.name == "index.html" ? "" : info.name;
             let route = `${path}/${name}`;
@@ -156,10 +160,9 @@ export class Brain {
             if (info.isDirectory()) continue;
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
+            // note: preceding slash here and index.html is not accounted for
             let path = info.parentPath.replace(`${this.siteDataPath}/static`, "");
-            let name = info.name == "index.html" ? "" : info.name;
-            let route = `${path}/${name}`;
-            if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
+            let route = `${path}/${info.name}`;
 
             await this.registerStaticFile(route, file);
         }
