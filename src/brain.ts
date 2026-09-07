@@ -5,15 +5,55 @@ import { errorMessageMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
 import type { BunFile } from "bun";
 
-type SpecialRawTypes = "skeleton";
-type SpecialComponentTypes = "error";
+export class InvalidConfigError extends Error {
+    constructor() {
+        super("The config passed to Brain was invalid! Check that you've filled out all required properties.");
+        this.name = "InvalidConfigError";
+    }
+}
+
+/**
+ * A class to configure Brain with. You should use builder syntax with this class, though you can always edit attributes
+ * manually. You must at least set the site data path, else this will throw an exception.
+ */
+export class BrainConfig {
+    debug: boolean = false;
+    siteDataPath: string | null = null;
+
+    /**
+     * Returns true if this is a valid config. At the moment, the only required config to set is the site data path.
+     */
+    validate(): boolean {
+        if (this.siteDataPath == null) return false;
+        return true;
+    }
+
+    /**
+     * Sets whether Brain should add debug information into the sites it generates in the form of comments in the HTML.
+     */
+    setDebug(debug: boolean) {
+        this.debug = debug;
+        return this;
+    }
+
+    /**
+     * Sets the path for where Brain gets components from. This is required for the server to start.
+     */
+    setSiteDataPath(siteDataPath: string) {
+        this.siteDataPath = siteDataPath;
+        return this;
+    }
+}
 
 /**
  * The main Brain class. You should instantiate an instance of this class, passing in the path to the datas needed, then
  * call and await Brain#init, which will read the paths and files inside them. Then, in your server handler, call
  * Brain#generateRoute.
  *
- * The path you give to the constructor should have a file layout that looks like the following:
+ * To pass in a config, create an instance of a BrainConfig class and use the builder pattern. You must set at least
+ * the site data path using BrainConfig#setSiteDataPath!
+ *
+ * The path you give to the site data path in the config should have a file layout that looks like the following:
  * ```plaintext
  * /
  * ├── main.js
@@ -46,6 +86,7 @@ export class Brain {
     private static readonly specialRawPages = ["skeleton"] as const;
     private static readonly specialComponentPages = ["error"] as const;
 
+    private config: BrainConfig;
     private siteDataPath: string;
 
     private components: Record<string, ComponentTree>;
@@ -54,8 +95,13 @@ export class Brain {
     private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
     private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
 
-    constructor(siteDataPath: string) {
-        this.siteDataPath = siteDataPath;
+    constructor(config: BrainConfig) {
+        if (!config.validate()) {
+            throw new InvalidConfigError();
+        }
+
+        this.config = config;
+        this.siteDataPath = this.config.siteDataPath!;
 
         // cut off ./ since fs.readdir doesn't prepend it
         if (this.siteDataPath.startsWith("./")) {
@@ -303,7 +349,7 @@ export class Brain {
                             `
                                 <div>Generating dependencies failed: ${res.unwrapErr()}</div>
                             `.trim(),
-                            { html: true }
+                            { html: true },
                         );
 
                         return;
