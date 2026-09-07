@@ -183,7 +183,7 @@ export class Brain {
      * @param file The file for this path.
      */
     async registerStaticFile(path: string, file: BunFile): Promise<Result> {
-        if (!await file.exists()) {
+        if (!(await file.exists())) {
             return Result.err("file does not exist");
         }
 
@@ -255,8 +255,8 @@ export class Brain {
     generatePage(route: string, parameters: StringMap = {}): Response {
         parameters = {
             ...parameters,
-            "Brain.route": route
-        }
+            "Brain.route": route,
+        };
 
         let component = this.routes[route];
         if (!component) {
@@ -268,9 +268,9 @@ export class Brain {
 
             return new Response(file, {
                 headers: {
-                    "Content-Type": file.type
-                }
-            })
+                    "Content-Type": file.type,
+                },
+            });
         }
 
         return new Response(this.generatePageFromComponent(component, parameters), {
@@ -288,7 +288,7 @@ export class Brain {
      * @returns The raw HTML source for the route.
      */
     generatePageFromComponent(component: ComponentTree, parameters: StringMap): string {
-        let html = component.generateServerHTML(new GenerationContext(this, parameters)).unwrapOrElse(err => err);
+        let html = component.generateServerHTML(new GenerationContext(this, parameters)).merge();
         let rewriter = new HTMLRewriter()
             .on("body", {
                 element(body) {
@@ -297,12 +297,29 @@ export class Brain {
             })
             .on("head", {
                 element: head => {
-                    let dependencies = component.getDependencies().unwrapOr([]);
+                    let res = component.getDependencies();
+                    if (res.isErr()) {
+                        head.append(
+                            `
+                                <div>Generating dependencies failed: ${res.unwrapErr()}</div>
+                            `.trim(),
+                            { html: true }
+                        );
+
+                        return;
+                    }
+
+                    let dependencies = res.unwrap();
+                    if (dependencies.length == 0) {
+                        return;
+                    }
+
                     let sources = dependencies.map(dep =>
                         this.generateClientJSForComponent(dep).unwrapOrElse(
                             err => `// Failed to generate ${dep}: ${err}`,
                         ),
                     );
+
                     head.prepend(
                         `
                             <script blocking="render">
