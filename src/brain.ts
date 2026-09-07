@@ -4,6 +4,7 @@ import ComponentTree from "./ComponentTree";
 import { errorMessageMap, type ParameterMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
 import type { BunFile } from "bun";
+import type { HTMLElement } from "happy-dom";
 
 export class InvalidConfigError extends Error {
     constructor() {
@@ -94,6 +95,7 @@ export class Brain {
     private staticFiles: Record<string, BunFile>;
     private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
     private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
+    private hooks: Record<string, HTMLRewriterTypes.HTMLRewriterElementContentHandlers>;
 
     constructor(config: BrainConfig) {
         if (!config.validate()) {
@@ -117,6 +119,8 @@ export class Brain {
 
         // @ts-ignore
         this.specialComponents = {};
+
+        this.hooks = {};
     }
 
     /**
@@ -247,6 +251,19 @@ export class Brain {
         // this will replace the file if it already exists
         this.staticFiles[path] = file;
         return Result.ok();
+    }
+
+    /**
+     * Registers a hook, which allows you to add HTML (or well, anything Bun allows) when Brain is rewriting the HTML.
+     * Takes in the name of the element and a callback, in the same type that Bun's HTMLRewriter allows.
+     * See https://bun.com/docs/runtime/html-rewriter.
+     * TODO: Maybe allow removing hooks?
+     * 
+     * @param element The name of the HTML element to call the callback on.
+     * @param callback The callback to run on it.
+     */
+    registerHook(element: string, callback: HTMLRewriterTypes.HTMLRewriterElementContentHandlers) {
+        this.hooks[element] = callback;
     }
 
     /**
@@ -388,6 +405,10 @@ export class Brain {
                     );
                 },
             });
+
+        for (let [element, callback] of Object.entries(this.hooks)) {
+            rewriter.on(element, callback);
+        }
 
         return rewriter.transform(this.specialRaws["skeleton"]);
     }
