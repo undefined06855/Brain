@@ -42,11 +42,6 @@ export class BrainConfig {
      * backslashes in the file path are replaced with forward slashes.
      */
     setSiteDataPath(siteDataPath: string) {
-        // forward slashes only!
-        if (process.platform == "win32") {
-            siteDataPath = siteDataPath.replaceAll("\\", "/");
-        }
-
         this.siteDataPath = siteDataPath;
         return this;
     }
@@ -139,6 +134,8 @@ export class Brain {
             recursive: true,
         })) {
             if (info.isDirectory()) continue;
+            if (process.platform == "win32") info.parentPath = info.parentPath.replaceAll("\\", "/");
+
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: no preceding slash here
@@ -154,6 +151,8 @@ export class Brain {
         // read routes (which are also technically components but with extra checks and parsing)
         for (let info of await fs.readdir(`${this.siteDataPath}/routes`, { withFileTypes: true, recursive: true })) {
             if (info.isDirectory()) continue;
+            if (process.platform == "win32") info.parentPath = info.parentPath.replaceAll("\\", "/");
+
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: preceding slash here
@@ -168,6 +167,8 @@ export class Brain {
         // read static files (which are just stored as BunFiles)
         for (let info of await fs.readdir(`${this.siteDataPath}/static`, { withFileTypes: true, recursive: true })) {
             if (info.isDirectory()) continue;
+            if (process.platform == "win32") info.parentPath = info.parentPath.replaceAll("\\", "/");
+
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: preceding slash here and index.html is not accounted for
