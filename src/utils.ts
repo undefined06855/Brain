@@ -1,4 +1,5 @@
 export type StringMap = { [k: string]: string | null };
+export type ParameterMap = { [k: string]: any };
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status plus some others
 export const errorMessageMap: Record<number, string> = {
