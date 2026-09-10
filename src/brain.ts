@@ -97,6 +97,7 @@ export class Brain {
     private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
     private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
     private hooks: Record<string, HTMLRewriterTypes.HTMLRewriterElementContentHandlers>;
+    private parameterHooks: Array<ParameterMap>;
 
     constructor(config: BrainConfig) {
         if (!config.validate()) {
@@ -122,6 +123,7 @@ export class Brain {
         this.specialComponents = {};
 
         this.hooks = {};
+        this.parameterHooks = [];
     }
 
     /**
@@ -271,6 +273,16 @@ export class Brain {
      */
     registerHook(element: string, callback: HTMLRewriterTypes.HTMLRewriterElementContentHandlers) {
         this.hooks[element] = callback;
+    }
+
+    /**
+     * Allows adding extra parameters to each page from somewhere other than the main Brain#generatePage call.
+     * TODO: Allow removing parameter hooks?
+     *
+     * @param parameters The extra parameters to add to each request.
+     */
+    registerParameterHook(parameters: ParameterMap) {
+        this.parameterHooks.push(parameters);
     }
 
     /**
