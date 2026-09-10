@@ -5,6 +5,7 @@ import { errorMessageMap, type ParameterMap, type StringMap } from "./utils";
 import { GenerationContext } from "./GenerationContext";
 import type { BunFile } from "bun";
 import type { HTMLElement } from "happy-dom";
+import path from "path";
 
 export class InvalidConfigError extends Error {
     constructor() {
@@ -140,9 +141,10 @@ export class Brain {
 
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
-            // note: no preceding slash here
-            let path = info.parentPath.replace(`${this.siteDataPath}/components/`, "");
-            let route = `${path}/${info.name}`;
+            // note: no preceding slash here, and file extension is removed
+            let relativeParent = path.relative(`${this.siteDataPath}/components`, info.parentPath);
+            let route = `${relativeParent}/${info.name}`;
+
             let split = route.split(".");
             split.pop();
             let stem = split.join(".");
@@ -158,9 +160,9 @@ export class Brain {
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: preceding slash here
-            let path = info.parentPath.replace(`${this.siteDataPath}/routes`, "");
+            let relativeParent = path.relative(`${this.siteDataPath}/routes`, info.parentPath);
             let name = info.name == "index.html" ? "" : info.name;
-            let route = `${path}/${name}`;
+            let route = `${relativeParent}/${name}`;
             if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
 
             await this.registerRoute(route, file);
@@ -174,8 +176,8 @@ export class Brain {
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: preceding slash here and index.html is not accounted for
-            let path = info.parentPath.replace(`${this.siteDataPath}/static`, "");
-            let route = `${path}/${info.name}`;
+            let relativeParent = path.relative(`${this.siteDataPath}/routes`, info.parentPath);
+            let route = `${relativeParent}/${info.name}`;
 
             await this.registerStaticFile(route, file);
         }
