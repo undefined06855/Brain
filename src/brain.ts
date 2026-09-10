@@ -349,17 +349,8 @@ export class Brain {
      * @returns The HTML source for the route as a Bun Response, if found, else an error.
      */
     generatePage(route: string, parameters: ParameterMap = {}): Response {
-        let routeParameters = {};
-
-        for (let hook of this.parameterHooks) {
-            routeParameters = {
-                ...routeParameters,
-                ...hook
-            };
-        }
-
-        routeParameters = {
-            ...routeParameters,
+        parameters = {
+            ...this.parameterHooks.reduce((prev, current) => ({ ...prev, ...current }), {}),
             ...parameters,
             "Brain.route": route,
         };
@@ -369,7 +360,7 @@ export class Brain {
             let file = this.staticFiles[route];
 
             if (!file) {
-                return this.generateErrorRoute(404, routeParameters);
+                return this.generateErrorRoute(404, parameters);
             }
 
             return new Response(file, {
@@ -379,7 +370,7 @@ export class Brain {
             });
         }
 
-        return new Response(this.generatePageFromComponent(component, routeParameters), {
+        return new Response(this.generatePageFromComponent(component, parameters), {
             headers: {
                 "Content-Type": "text/html",
             },
