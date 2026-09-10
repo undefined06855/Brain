@@ -144,6 +144,7 @@ export class Brain {
             // note: no preceding slash here, and file extension is removed
             let relativeParent = path.relative(`${this.siteDataPath}/components`, info.parentPath);
             let route = `${relativeParent}/${info.name}`;
+            if (route.startsWith("/")) route = route.slice(1);
 
             let split = route.split(".");
             split.pop();
@@ -176,7 +177,7 @@ export class Brain {
             let file = Bun.file(`${info.parentPath}/${info.name}`);
 
             // note: preceding slash here and index.html is not accounted for
-            let relativeParent = path.relative(`${this.siteDataPath}/routes`, info.parentPath);
+            let relativeParent = path.relative(`${this.siteDataPath}/static`, info.parentPath);
             let route = `${relativeParent}/${info.name}`;
 
             await this.registerStaticFile(route, file);
