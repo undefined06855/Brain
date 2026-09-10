@@ -350,6 +350,7 @@ export class Brain {
      */
     generatePage(route: string, parameters: ParameterMap = {}): Response {
         parameters = {
+            ...this.parameterHooks,
             ...parameters,
             "Brain.route": route,
         };
