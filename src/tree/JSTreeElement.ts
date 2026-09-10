@@ -30,10 +30,10 @@ export class JSTreeElement extends TreeElement {
 
     override generateClientJS(): string {
         return `
-            document.createTextNode((() => {
+            (() => {
                 const SIDE = "client";
-                ${this.functionSource}
-            })() ?? "")
+                return ${this.functionSource} ?? document.createTextNode("");
+            })()
         `.trim();
     }
 
