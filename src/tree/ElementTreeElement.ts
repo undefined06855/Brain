@@ -26,7 +26,6 @@ export class ElementTreeElement extends TreeElement {
             for (let type of TreeElement.treeElementTypes) {
                 if (type.matches(child)) {
                     this.childNodes.push(new (type as typeof ElementTreeElement)(child));
-                    found = true;
                     break;
                 }
             }
