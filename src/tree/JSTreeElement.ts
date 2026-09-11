@@ -7,7 +7,7 @@ import type { GenerationContext } from "../GenerationContext";
  * Matched by comments that look like <!--{{ return "hi" }}--> and match no other possible tree elements.
  */
 export class JSTreeElement extends TreeElement {
-    private static regex = /\s*{{\s*((?:.|\n)+)\s*}}\s*/;
+    private static regex = /\s*{{\s*([\s\S]+?)\s*}}\s*/;
 
     private functionSource: string;
 
@@ -20,7 +20,7 @@ export class JSTreeElement extends TreeElement {
     }
 
     static override matches(element: Node): boolean {
-        console.log(`testing if jstreeeleemnt matches ${element.textContent} (regex: ${JSTreeElement.regex.exec(element.textContent)})`)
+        console.log(`testing if jstreeeleemnt matches ${JSON.stringify(element.textContent)} (regex: ${JSTreeElement.regex.exec(element.textContent)})`)
         if (element.nodeType != Node.COMMENT_NODE) return false;
         return !!JSTreeElement.regex.exec(element.textContent);
     }
