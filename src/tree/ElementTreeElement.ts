@@ -23,17 +23,12 @@ export class ElementTreeElement extends TreeElement {
 
         this.childNodes = [];
         for (let child of this.root.childNodes) {
-            let found = false;
             for (let type of TreeElement.treeElementTypes) {
                 if (type.matches(child)) {
                     this.childNodes.push(new (type as typeof ElementTreeElement)(child));
                     found = true;
                     break;
                 }
-            }
-
-            if (!found && child.nodeType == Node.COMMENT_NODE) {
-                console.warn(`Comment node was discarded: ${child}`);
             }
         }
     }
