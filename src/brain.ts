@@ -94,7 +94,6 @@ export class Brain {
 
     private components: Record<string, ComponentTree>;
     private routes: Record<string, ComponentTree>;
-    private staticFiles: Record<string, BunFile>;
     private specialRaws: Record<(typeof Brain.specialRawPages)[number], string>;
     private specialComponents: Record<(typeof Brain.specialComponentPages)[number], ComponentTree>;
     private hooks: Record<string, HTMLRewriterTypes.HTMLRewriterElementContentHandlers>;
@@ -115,7 +114,6 @@ export class Brain {
 
         this.components = {};
         this.routes = {};
-        this.staticFiles = {};
 
         // @ts-ignore since we don't define each one explicitly
         this.specialRaws = {};
@@ -169,20 +167,6 @@ export class Brain {
             await this.registerRoute(route, file);
         }
 
-        // read static files (which are just stored as BunFiles)
-        for (let info of await fs.readdir(`${this.siteDataPath}/static`, { withFileTypes: true, recursive: true })) {
-            if (info.isDirectory()) continue;
-            if (process.platform == "win32") info.parentPath = info.parentPath.replaceAll("\\", "/");
-
-            let file = Bun.file(`${info.parentPath}/${info.name}`);
-
-            // note: preceding slash here and index.html is not accounted for
-            let relativeParent = path.relative(`${this.siteDataPath}/static`, info.parentPath);
-            let route = `${relativeParent}/${info.name}`;
-
-            await this.registerStaticFile(route, file);
-        }
-
         // read special thingymabobs
         for (let page of Brain.specialRawPages) {
             this.specialRaws[page] = await Bun.file(`${this.siteDataPath}/special/${page}.html`).text();
@@ -205,7 +189,6 @@ export class Brain {
         );
         console.debug(`Loaded components:\n  - ${Object.keys(this.components).join("\n  - ")}`);
         console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
-        console.debug(`Loaded static files:\n  - ${Object.keys(this.staticFiles).join("\n  - ")}`);
     }
 
     /**
@@ -348,7 +331,7 @@ export class Brain {
      * @param parameters The parameters to pass into components which need them.
      * @returns The HTML source for the route as a Bun Response, if found, else an error.
      */
-    generatePage(route: string, parameters: ParameterMap = {}): Response {
+    async generatePage(route: string, parameters: ParameterMap = {}): Promise<Response> {
         parameters = {
             ...this.parameterHooks.reduce((prev, current) => ({ ...prev, ...current }), {}),
             ...parameters,
@@ -356,23 +339,24 @@ export class Brain {
         };
 
         let component = this.routes[route];
-        if (!component) {
-            let file = this.staticFiles[route];
-
-            if (!file) {
-                return this.generateErrorRoute(404, parameters);
-            }
-
-            return new Response(file, {
+        if (component) {
+            return new Response(this.generatePageFromComponent(component, parameters), {
                 headers: {
-                    "Content-Type": file.type,
+                    "Content-Type": "text/html",
                 },
             });
         }
 
-        return new Response(this.generatePageFromComponent(component, parameters), {
+        let path = `${this.siteDataPath}/static${route}`;
+        let file = Bun.file(path);
+
+        if (!(await file.exists())) {
+            return this.generateErrorRoute(404, parameters);
+        }
+
+        return new Response(file, {
             headers: {
-                "Content-Type": "text/html",
+                "Content-Type": file.type,
             },
         });
     }
