@@ -185,7 +185,7 @@ export class Brain {
         }
 
         console.info(
-            `Loaded ${Object.keys(this.components).length} components, ${Object.keys(this.routes).length} routes, and ${Object.keys(this.staticFiles).length} static files.`,
+            `Loaded ${Object.keys(this.components).length} components and ${Object.keys(this.routes).length} routes.`,
         );
         console.debug(`Loaded components:\n  - ${Object.keys(this.components).join("\n  - ")}`);
         console.debug(`Loaded routes:\n  - ${Object.keys(this.routes).join("\n  - ")}`);
@@ -233,22 +233,6 @@ export class Brain {
     }
 
     /**
-     * Registers a static file. Can be called manually, and should be called manually for if static files update with
-     * new data.
-     * @param path The path that this file refers to, with the preceding slash.
-     * @param file The file for this path.
-     */
-    async registerStaticFile(path: string, file: BunFile): Promise<Result> {
-        if (!(await file.exists())) {
-            return Result.err("file does not exist");
-        }
-
-        // this will replace the file if it already exists
-        this.staticFiles[path] = file;
-        return Result.ok();
-    }
-
-    /**
      * Registers a hook, which allows you to add HTML (or well, anything Bun allows) when Brain is rewriting the HTML.
      * Takes in the name of the element and a callback, in the same type that Bun's HTMLRewriter allows.
      * See https://bun.com/docs/runtime/html-rewriter.
@@ -285,14 +269,6 @@ export class Brain {
      */
     getRoute(path: string): Result<ComponentTree> {
         return Result.fromNull(this.routes[path], `route ${path} was not found`);
-    }
-
-    /**
-     * Gets a static file by the path.
-     * @param path The path of the file
-     */
-    getStaticFile(path: string): Result<BunFile> {
-        return Result.fromNull(this.staticFiles[path], `static file ${path} was not found`);
     }
 
     /**
