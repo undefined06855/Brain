@@ -32,8 +32,8 @@ export class ElementTreeElement extends TreeElement {
                 }
             }
 
-            if (!found) {
-                console.warn(`Node was discarded: ${child}`);
+            if (!found && child.nodeType == Node.COMMENT_NODE) {
+                console.warn(`Comment node was discarded: ${child}`);
             }
         }
     }

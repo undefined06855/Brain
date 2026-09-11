@@ -20,6 +20,7 @@ export class JSTreeElement extends TreeElement {
     }
 
     static override matches(element: Node): boolean {
+        console.log(`testing if jstreeeleemnt matches ${element.textContent} (regex: ${JSTreeElement.regex.exec(element.textContent)})`)
         if (element.nodeType != Node.COMMENT_NODE) return false;
         return !!JSTreeElement.regex.exec(element.textContent);
     }
