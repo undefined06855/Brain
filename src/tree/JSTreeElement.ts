@@ -32,8 +32,8 @@ export class JSTreeElement extends TreeElement {
         return `
             (() => {
                 const SIDE = "client";
-                return ${this.functionSource} ?? document.createTextNode("");
-            })()
+                ${this.functionSource}
+            })() ?? document.createTextNode("")
         `.trim();
     }
 
