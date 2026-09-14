@@ -19,11 +19,11 @@ export class CSSTreeElement extends ElementTreeElement {
         if (context.debug) {
             return `
                 <!-- begin head html css -->
-                ${this.generateServerHTML(context)}
+                ${super.generateServerHTML(context)}
                 <!-- end head html css -->
             `;
         } else {
-            return this.generateServerHTML(context);
+            return super.generateServerHTML(context);
         }
     }
 }
