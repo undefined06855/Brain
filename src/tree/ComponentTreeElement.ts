@@ -53,6 +53,10 @@ export class ComponentTreeElement extends TreeElement {
         `.trim();
     }
 
+    override generateHeadJS(): string {
+        return `document.createTextNode("")`;
+    }
+
     override generateServerHTML(context: GenerationContext): string {
         return context.brain
             .generateServerHTMLForComponent(this.componentName, {

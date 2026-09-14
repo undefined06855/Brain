@@ -28,6 +28,10 @@ export class ParamTreeElement extends TreeElement {
         return `document.createTextNode(params[${JSON.stringify(this.paramName)}] ?? "(param \\"" + ${JSON.stringify(this.paramName)} + "\\" which was not provided)")`;
     }
 
+    override generateHeadJS(): string {
+        return `document.createTextNode("")`;
+    }
+
     override generateServerHTML(context: GenerationContext): string {
         if (!context.params[this.paramName]) {
             return `

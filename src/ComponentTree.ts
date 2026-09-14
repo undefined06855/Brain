@@ -68,7 +68,16 @@ export default class ComponentTree {
         return Result.ok(
             `
                 !(() => {
+                    let __firstCreation = true;
                     window[${JSON.stringify(this.name)}] = ((params = {}) => {
+                        if (__firstCreation) {
+                            __firstCreation = false;
+
+                            document.head.appendChild((() => {
+                                return ${this.head!.generateHeadJS()}
+                            }))());
+                        }
+
                         return ${this.head!.generateClientJS()}
                     });
                 })();
