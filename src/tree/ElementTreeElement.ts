@@ -63,10 +63,6 @@ export class ElementTreeElement extends TreeElement {
         `.trim();
     }
 
-    override generateHeadJS(): string {
-        return `document.createTextNode("")`;
-    }
-
     override generateServerHTML(context: GenerationContext): string {
         return `
             <${this.nodeName} ${Object.entries(this.attributes)

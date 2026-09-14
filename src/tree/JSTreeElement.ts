@@ -37,10 +37,6 @@ export class JSTreeElement extends TreeElement {
         `.trim();
     }
 
-    override generateHeadJS(): string {
-        return `document.createTextNode("")`;
-    }
-
     override generateServerHTML(context: GenerationContext): string {
         let evalString = `
             (() => {

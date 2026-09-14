@@ -15,14 +15,6 @@ export class CSSTreeElement extends ElementTreeElement {
         return "";
     }
 
-    override generateClientJS(): string {
-        return `document.createTextNode("")`;
-    }
-
-    override generateHeadJS(): string {
-        return super.generateClientJS();
-    }
-
     override generateHeadHTML(context: GenerationContext): string {
         if (context.debug) {
             return `

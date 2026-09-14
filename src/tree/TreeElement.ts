@@ -24,7 +24,6 @@ export default abstract class TreeElement {
 
     abstract isCacheable(): boolean;
     abstract generateClientJS(): string;
-    abstract generateHeadJS(): string;
     abstract generateServerHTML(context: GenerationContext): string;
     abstract generateHeadHTML(context: GenerationContext): string;
 }

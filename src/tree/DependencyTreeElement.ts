@@ -25,11 +25,7 @@ export class DependencyTreeElement extends TreeElement {
     }
 
     override generateClientJS(): string {
-        return `document.createTextNode("")`;
-    }
-
-    override generateHeadJS(): string {
-        return `document.createTextNode("")`;
+        return `document.createTextNode(\\"\\")`;
     }
 
     override generateServerHTML(context: GenerationContext): string {
