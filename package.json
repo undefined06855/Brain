@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "happy-dom": "^20.11.6",
+        "html-entities": "^2.6.0",
         "result-js": "https://github.com/undefined06855/result-js"
     },
     "scripts": {

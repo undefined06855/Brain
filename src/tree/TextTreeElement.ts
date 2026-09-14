@@ -1,6 +1,7 @@
 import { Node } from "happy-dom";
 import type { GenerationContext } from "../GenerationContext";
 import TreeElement from "./TreeElement";
+import * as entities from "html-entities";
 
 export class TextTreeElement extends TreeElement {
     private contents: string;
@@ -19,7 +20,7 @@ export class TextTreeElement extends TreeElement {
     }
 
     override generateClientJS(): string {
-        return `document.createTextNode(${JSON.stringify(this.contents)})`;
+        return `document.createTextNode(${JSON.stringify(entities.decode(this.contents))})`;
     }
 
     override generateServerHTML(context: GenerationContext): string {
