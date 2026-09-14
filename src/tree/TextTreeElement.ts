@@ -20,7 +20,6 @@ export class TextTreeElement extends TreeElement {
     }
 
     override generateClientJS(): string {
-        console.log(this.contents, entities.decode(this.contents), JSON.stringify(entities.decode(this.contents)));
         return `document.createTextNode(${JSON.stringify(entities.decode(this.contents))})`;
     }
 
