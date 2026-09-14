@@ -161,8 +161,9 @@ export class Brain {
             // note: preceding slash here
             let relativeParent = path.relative(`${this.siteDataPath}/routes`, info.parentPath);
             let name = info.name == "index.html" ? "" : info.name;
-            let route = `${relativeParent}/${name}`;
+            let route = `/${relativeParent}/${name}`;
             if (route.endsWith("/") && route != "/") route = route.slice(0, -1);
+            if (route.startsWith("//")) route = route.slice(2, 0);
 
             await this.registerRoute(route, file);
         }
