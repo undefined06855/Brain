@@ -57,4 +57,8 @@ export class JSTreeElement extends TreeElement {
             return eval(evalString);
         }
     }
+
+    override generateHeadHTML(context: GenerationContext): string {
+        return "";
+    }
 }

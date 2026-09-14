@@ -62,6 +62,15 @@ export class ComponentTreeElement extends TreeElement {
             .merge();
     }
 
+    override generateHeadHTML(context: GenerationContext): string {
+        return context.brain
+            .generateHeadHTMLForComponent(this.componentName, {
+                ...context.params,
+                ...this.params
+            })
+            .merge();
+    }
+
     getComponentName() {
         return this.componentName;
     }

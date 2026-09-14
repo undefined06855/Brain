@@ -49,6 +49,10 @@ export class ParamTreeElement extends TreeElement {
         }
     }
 
+    override generateHeadHTML(context: GenerationContext): string {
+        return "";
+    }
+
     getParamName() {
         return this.paramName;
     }

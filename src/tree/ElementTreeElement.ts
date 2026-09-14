@@ -73,6 +73,10 @@ export class ElementTreeElement extends TreeElement {
         `.trim();
     }
 
+    override generateHeadHTML(context: GenerationContext): string {
+        return this.childNodes.map(child => child.generateHeadHTML(context)).join("");
+    }
+
     /**
      * @returns {Array<string>}
      */

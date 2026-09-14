@@ -301,6 +301,22 @@ export class Brain {
     }
 
     /**
+     * Generates the head HTML source for a component, with nothing else attached. Will generate nothing for most
+     * components.
+     * @param name The name of the component.
+     * @param params The parameters to pass to generation.
+     * @returns The HTML source of the component if found, else an error.
+     */
+    generateHeadHTMLForComponent(name: string, params: ParameterMap): Result<string> {
+        let component = this.components[name];
+        if (!component) {
+            return Result.err(`component ${name} was not found`);
+        }
+
+        return component.generateHeadHTML(new GenerationContext(this, params));
+    }
+
+    /**
      * Generates the full HTML source for a route, which can be returned in a HTTP response. If the route is not found,
      * returns `Brain#generateErrorRoute` with the 404 error and the parameters fallen through.
      * @param route The route, without the trailing slash!
@@ -345,11 +361,12 @@ export class Brain {
      * @returns The raw HTML source for the route.
      */
     generatePageFromComponent(component: ComponentTree, parameters: ParameterMap): string {
-        let html = component.generateServerHTML(new GenerationContext(this, parameters)).merge();
+        let bodyHTML = component.generateServerHTML(new GenerationContext(this, parameters)).merge();
+        let headHTML = component.generateHeadHTML(new GenerationContext(this, parameters)).merge();
         let rewriter = new HTMLRewriter()
             .on("body", {
                 element(body) {
-                    body.append(html, { html: true });
+                    body.append(bodyHTML, { html: true });
                 },
             })
             .on("head", {
@@ -386,6 +403,8 @@ export class Brain {
                         `.trim(),
                         { html: true },
                     );
+
+                    head.prepend(headHTML, { html: true });
                 },
             });
 

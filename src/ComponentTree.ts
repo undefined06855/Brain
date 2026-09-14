@@ -8,6 +8,7 @@ import {
     ComponentTreeElement,
     ElementTreeElement,
     DependencyTreeElement,
+    CSSTreeElement
 } from "./tree";
 import TreeElement from "./tree/TreeElement";
 
@@ -19,6 +20,7 @@ TreeElement.treeElementTypes.push(DependencyTreeElement);
 TreeElement.treeElementTypes.push(ComponentTreeElement);
 TreeElement.treeElementTypes.push(ParamTreeElement);
 TreeElement.treeElementTypes.push(JSTreeElement);
+TreeElement.treeElementTypes.push(CSSTreeElement);
 TreeElement.treeElementTypes.push(ElementTreeElement);
 
 export default class ComponentTree {
@@ -88,6 +90,23 @@ export default class ComponentTree {
         } else {
             return Result.ok(this.head!.generateServerHTML(context));
         }
+    }
+
+    generateHeadHTML(context: GenerationContext): Result<string> {
+        if (!this.initialized) return Result.err("component tree has not been initialized yet");
+
+        if (context.debug) {
+            return Result.ok(
+                `
+                <!-- begin head html for ${this.name} (cacheable: ${this.isCacheable().unwrap()}, ${this.getDependencies().unwrap().length} dependencies, ${this.getParameters().unwrap().length} parameters) -->
+                    ${this.head!.generateHeadHTML(context)}
+                <!-- end ${this.name} -->
+            `.trim(),
+            );
+        } else {
+            return Result.ok(this.head!.generateHeadHTML(context));
+        }
+
     }
 
     getDependencies(): Result<Array<string>> {

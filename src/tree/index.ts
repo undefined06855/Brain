@@ -1,4 +1,5 @@
 export * from "./ComponentTreeElement";
+export * from "./CSSTreeElement";
 export * from "./DependencyTreeElement";
 export * from "./ElementTreeElement";
 export * from "./JSTreeElement";

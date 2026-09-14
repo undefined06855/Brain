@@ -32,6 +32,10 @@ export class DependencyTreeElement extends TreeElement {
         return context.debug ? `<!-- hidden: dependency on ${this.componentName} -->` : "";
     }
 
+    override generateHeadHTML(context: GenerationContext): string {
+        return context.brain.generateHeadHTMLForComponent(this.componentName, {}).merge();
+    }
+
     getComponentName() {
         return this.componentName;
     }

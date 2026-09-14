@@ -26,6 +26,10 @@ export class TextTreeElement extends TreeElement {
         return `${this.contents}`;
     }
 
+    override generateHeadHTML(context: GenerationContext): string {
+        return "";
+    }
+
     getContents() {
         return this.contents;
     }
