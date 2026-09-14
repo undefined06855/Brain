@@ -405,7 +405,10 @@ export class Brain {
                         `.trim(),
                         { html: true },
                     );
-
+                },
+            })
+            .on("head", {
+                element: head => {
                     head.prepend(
                         `
                             ${this.config.debug ? "<!-- begin headHTML -->" : ""}
