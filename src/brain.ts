@@ -364,6 +364,7 @@ export class Brain {
     generatePageFromComponent(component: ComponentTree, parameters: ParameterMap): string {
         let bodyHTML = component.generateServerHTML(new GenerationContext(this, parameters)).merge();
         let headHTML = component.generateHeadHTML(new GenerationContext(this, parameters)).merge();
+
         let rewriter = new HTMLRewriter()
             .on("body", {
                 element(body) {
@@ -405,7 +406,14 @@ export class Brain {
                         { html: true },
                     );
 
-                    head.prepend(headHTML, { html: true });
+                    head.prepend(
+                        `
+                            ${this.config.debug ? "<!-- begin headHTML -->" : ""}
+                            ${headHTML}
+                            ${this.config.debug ? "<!-- end headHTML -->" : ""}
+                        `.trim(),
+                        { html: true },
+                    );
                 },
             });
 

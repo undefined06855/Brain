@@ -16,6 +16,14 @@ export class CSSTreeElement extends ElementTreeElement {
     }
 
     override generateHeadHTML(context: GenerationContext): string {
-        return this.generateServerHTML(context);
+        if (context.debug) {
+            return `
+                <!-- begin head html css -->
+                ${this.generateServerHTML(context)}
+                <!-- end head html css -->
+            `;
+        } else {
+            return this.generateServerHTML(context);
+        }
     }
-};
+}

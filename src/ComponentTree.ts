@@ -8,7 +8,7 @@ import {
     ComponentTreeElement,
     ElementTreeElement,
     DependencyTreeElement,
-    CSSTreeElement
+    CSSTreeElement,
 } from "./tree";
 import TreeElement from "./tree/TreeElement";
 
@@ -106,7 +106,6 @@ export default class ComponentTree {
         } else {
             return Result.ok(this.head!.generateHeadHTML(context));
         }
-
     }
 
     getDependencies(): Result<Array<string>> {

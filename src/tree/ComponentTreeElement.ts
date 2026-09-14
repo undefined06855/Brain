@@ -66,7 +66,7 @@ export class ComponentTreeElement extends TreeElement {
         return context.brain
             .generateHeadHTMLForComponent(this.componentName, {
                 ...context.params,
-                ...this.params
+                ...this.params,
             })
             .merge();
     }
